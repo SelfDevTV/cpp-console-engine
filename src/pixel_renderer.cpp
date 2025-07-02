@@ -41,6 +41,15 @@ public:
 
   void render() {
     std::cout << "\033[H"; // Move to top
+    
+    // Debug: Print pixel count
+    int pixelCount = 0;
+    for (int y = 0; y < pixelHeight; y++) {
+      for (int x = 0; x < pixelWidth; x++) {
+        if (pixels[y][x].state) pixelCount++;
+      }
+    }
+    std::cout << "\033[31H" << "Active pixels: " << pixelCount << std::flush;
 
     // Process 2 pixel rows at a time
     for (int y = 0; y < pixelHeight; y += 2) {
@@ -51,17 +60,18 @@ public:
 
         // Convert 2 pixels into 1 character
         if (topPixel.state && bottomPixel.state) {
-          std::cout << "\033[3" << topPixel.color << "m█";
+          std::cout << "\033[3" << topPixel.color << "m█\033[0m";
         } else if (topPixel.state) {
-          std::cout << "\033[3" << topPixel.color << "m▀";
+          std::cout << "\033[3" << topPixel.color << "m▀\033[0m";
         } else if (bottomPixel.state) {
-          std::cout << "\033[3" << bottomPixel.color << "m▄";
+          std::cout << "\033[3" << bottomPixel.color << "m▄\033[0m";
         } else {
           std::cout << " "; // Both pixels off
         }
       }
       std::cout << "\n";
     }
+    std::cout.flush();
   }
 
   // Example: Draw a simple pattern

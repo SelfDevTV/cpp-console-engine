@@ -1,10 +1,11 @@
 # Console Game Engine Makefile
 
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -O2
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -Iinclude
 TARGET = game
 SRCDIR = src
-SOURCES = $(SRCDIR)/main.cpp
+INCDIR = include
+SOURCES = $(wildcard $(SRCDIR)/*.cpp)
 
 .PHONY: all clean run
 
