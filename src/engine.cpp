@@ -1,8 +1,36 @@
 #include "../include/engine.h"
+#include <ostream>
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <algorithm>
 
-Engine::Engine(int w, int h) : renderer{w, h}, w(w), h(h) {
+// Get terminal size with fallback
+std::pair<int, int> getTerminalSize() {
+  struct winsize ws;
+  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0 && ws.ws_row > 0) {
+    return {ws.ws_col, ws.ws_row};
+  }
+  // Fallback to reasonable defaults
+  return {80, 24};
+}
+
+// Calculate width that fits in terminal
+int getTerminalFitWidth(int requestedWidth) {
+  auto [termWidth, termHeight] = getTerminalSize();
+  return std::min(requestedWidth, termWidth);
+}
+
+// Calculate height that fits in terminal (accounting for HalfHeightRenderer)
+int getTerminalFitHeight(int requestedHeight) {
+  auto [termWidth, termHeight] = getTerminalSize();
+  // HalfHeightRenderer uses 2 pixel rows per terminal row
+  // Leave 1 row for potential status/debug info
+  int maxPixelHeight = (termHeight - 1) * 2;
+  return std::min(requestedHeight, maxPixelHeight);
+}
+
+Engine::Engine(int w, int h) : renderer{getTerminalFitWidth(w), getTerminalFitHeight(h)}, w(getTerminalFitWidth(w)), h(getTerminalFitHeight(h)) {
   struct termios old_tio, new_tio;
   tcgetattr(STDIN_FILENO, &old_tio);
   new_tio = old_tio;
@@ -22,7 +50,6 @@ Engine::Engine(int w, int h) : renderer{w, h}, w(w), h(h) {
   tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 
   std::string clearScreen = "\033[2J\033[H";
-
   std::cout << clearScreen;
   init();
   // Don't call run() here - let derived class call it

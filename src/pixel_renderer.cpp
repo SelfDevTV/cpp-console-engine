@@ -49,7 +49,6 @@ public:
         if (pixels[y][x].state) pixelCount++;
       }
     }
-    std::cout << "\033[31H" << "Active pixels: " << pixelCount << std::flush;
 
     // Process 2 pixel rows at a time
     for (int y = 0; y < pixelHeight; y += 2) {
@@ -60,11 +59,11 @@ public:
 
         // Convert 2 pixels into 1 character
         if (topPixel.state && bottomPixel.state) {
-          std::cout << "\033[3" << topPixel.color << "m█\033[0m";
+          std::cout << "\033[3" << topPixel.color << "m█";
         } else if (topPixel.state) {
-          std::cout << "\033[3" << topPixel.color << "m▀\033[0m";
+          std::cout << "\033[3" << topPixel.color << "m▀";
         } else if (bottomPixel.state) {
-          std::cout << "\033[3" << bottomPixel.color << "m▄\033[0m";
+          std::cout << "\033[3" << bottomPixel.color << "m▄";
         } else {
           std::cout << " "; // Both pixels off
         }
